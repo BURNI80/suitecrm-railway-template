@@ -180,4 +180,10 @@ echo "  SuiteCRM ready at: ${SITE_URL}"
 echo "  Open the URL and follow the web installer"
 echo "==========================================="
 
+# Fix: disable all MPM modules then enable only mpm_prefork
+# This runs at runtime because Railway may re-enable modules at startup
+a2dismod mpm_event 2>/dev/null || true
+a2dismod mpm_worker 2>/dev/null || true
+a2enmod mpm_prefork 2>/dev/null || true
+
 exec apache2-foreground
