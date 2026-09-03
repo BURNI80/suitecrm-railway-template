@@ -39,10 +39,13 @@ ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.com}"
 
 if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
     SITE_URL="https://${RAILWAY_PUBLIC_DOMAIN}"
+    HOST_NAME="${RAILWAY_PUBLIC_DOMAIN}"
 elif [ -n "$RAILWAY_SERVICE_DOMAIN" ]; then
     SITE_URL="https://${RAILWAY_SERVICE_DOMAIN}"
+    HOST_NAME="${RAILWAY_SERVICE_DOMAIN}"
 else
     SITE_URL="${APP_URL:-http://localhost}"
+    HOST_NAME="localhost"
 fi
 
 echo "[3/4] DB: ${DB_HOST}:${DB_PORT} / ${DB_NAME}  User: ${DB_USER}"
@@ -79,18 +82,42 @@ if [ ! -f "$SUITECRM_WEB/config.php" ] && [ ! -f "$SUITECRM_WEB/suitecrm.log" ];
 SIEOF
     chown www-data:www-data "$SUITECRM_WEB/config_si.php"
 
-    # Run silent install from webroot (PHP CLI)
+    # Write auto-install PHP script
+    cat > "$SUITECRM_WEB/auto_install.php" << INSTALLEOF
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
+\$_SERVER['HTTP_HOST']   = '${HOST_NAME}';
+\$_SERVER['SERVER_NAME'] = '${HOST_NAME}';
+\$_SERVER['REQUEST_URI'] = '/install.php';
+\$_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+\$_SERVER['REQUEST_METHOD'] = 'GET';
+\$_SERVER['QUERY_STRING'] = '';
+\$_SERVER['SERVER_PORT'] = '443';
+\$_SERVER['HTTPS'] = 'on';
+
+\$_REQUEST = array(
+    'goto' => 'SilentInstall',
+    'cli'  => 'true',
+);
+
+chdir('${SUITECRM_WEB}');
+require_once 'install.php';
+INSTALLEOF
+    chown www-data:www-data "$SUITECRM_WEB/auto_install.php"
+
+    # Run silent install
     cd "$SUITECRM_WEB"
-    php -d error_reporting=E_ALL -d display_errors=1 \
-        -r "\$_SERVER['HTTP_HOST']='$SITE_URL'; \$_SERVER['REQUEST_URI']='install.php'; \$_SERVER['SERVER_NAME']='$SITE_URL'; \$_REQUEST=array('goto'=>'SilentInstall','cli'=>true); require_once 'install.php';" \
-        2>&1 || true
+    php auto_install.php 2>&1 || true
     cd /
 
     # Cleanup: remove installer files
     rm -f "$SUITECRM_WEB/config_si.php"
+    rm -f "$SUITECRM_WEB/auto_install.php"
     rm -rf "$SUITECRM_WEB/install" 2>/dev/null || true
     chown -R www-data:www-data "$SUITECRM_WEB"
-    echo "      Install complete."
+    echo "      Install attempt finished."
 else
     echo "[4/4] Already installed — skipping."
 fi
