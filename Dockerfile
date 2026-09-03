@@ -34,7 +34,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     sodium
 
 # Switch from event to prefork MPM and enable rewrite
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.* && \
+# Comment out event MPM load file AND remove symlinks to prevent conflict
+RUN sed -i 's/^LoadModule mpm_event_module/#&/' /etc/apache2/mods-available/mpm_event.load && \
+    rm -f /etc/apache2/mods-enabled/mpm_event.* && \
     a2enmod mpm_prefork && \
     a2enmod rewrite headers expires
 
