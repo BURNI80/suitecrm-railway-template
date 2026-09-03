@@ -49,6 +49,10 @@ RUN curl -L -o /tmp/suitecrm.zip \
     && mv /tmp/suitecrm-src/SuiteCRM-7.15.2 /var/suitecrm-app \
     && rm -rf /tmp/suitecrm.zip /tmp/suitecrm-src
 
+# Install Composer and dependencies
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN cd /var/suitecrm-app && composer install --no-dev --optimize-autoloader --no-interaction 2>/dev/null || true
+
 # Entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
