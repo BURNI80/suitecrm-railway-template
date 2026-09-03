@@ -61,102 +61,74 @@ echo "      Site URL: ${SITE_URL}"
 
 # ── 4. Generate config.php ──
 echo "[4/5] Generating config.php..."
-cat > "$SUITECRM_WEB/config.php" << 'CONFEOF'
-<?php
-$sugar_config = array();
-CONFEOF
+php -r "
+\$db_host = '${DB_HOST}';
+\$db_port = '${DB_PORT}';
+\$db_user = '${DB_USER}';
+\$db_pass = str_replace(\"'\", \"\\\\'\", '${DB_PASS}');
+\$db_name = '${DB_NAME}';
+\$site_url = '${SITE_URL}';
 
-cat >> "$SUITECRM_WEB/config.php" << CONFEOF
-$sugar_config['dbconfig'] = array(
-    'db_host_name' => '${DB_HOST}',
-    'db_host_port' => '${DB_PORT}',
-    'db_user_name' => '${DB_USER}',
-    'db_password'  => '${DB_PASS}',
-    'db_name'      => '${DB_NAME}',
-    'db_type'      => 'mysql',
-    'db_connector' => '',
-);
-$sugar_config['site_url'] = '${SITE_URL}';
-$sugar_config['default_theme'] = 'SuiteP';
-$sugar_config['default_language'] = 'en_us';
-$sugar_config['log_dir'] = 'logs/';
-$sugar_config['cache_dir'] = 'cache/';
-$sugar_config['upload_dir'] = 'upload/';
-$sugar_config['custom_dir'] = 'custom/';
-$sugar_config['modules_dir'] = 'modules/';
-$sugar_config['themes_dir'] = 'themes/';
-$sugar_config['template_dir'] = 'themes/';
-$sugar_config['import_dir'] = 'cache/import/';
-$sugar_config['display_errors'] = false;
-$sugar_config['error_reporting'] = true;
-$sugar_config['test'] = false;
-$sugar_config['use_php_json'] = true;
-$sugar_config['use_cookies_for_session'] = true;
-$sugar_config['http_only'] = true;
-$sugar_config['session'] = array(
-    'auto_start' => false,
-    'name' => 'sugar_user_theme',
-);
-$sugar_config['default_date_format'] = 'm/d/Y';
-$sugar_config['default_time_format'] = 'h:i a';
-$sugar_config['default_number_grouping'] = '3';
-$sugar_config['default_decimal_symbol'] = '.';
-$sugar_config['default_currency_significant_digits'] = '2';
-$sugar_config['default_currency_name'] = 'US Dollar';
-$sugar_config['default_currency_symbol'] = '\$';
-$sugar_config['default_locale_name_format'] = 's f l';
-$sugar_config['scanner_type'] = 'files';
-$sugar_config['admin'] = array(
-    'dir_name' => 'admin',
-    'default_action' => 'home',
-);
-$sugar_config['css'] = array(
-    'production' => 'grp_css',
-    'developer' => 'grp_css',
-    'cache_dir' => 'cache/themes/',
-);
-$sugar_config['javascript'] = array(
-    'production' => 'grp_javascript',
-    'developer' => 'grp_javascript',
-    'cache_dir' => 'cache/js/',
-);
-$sugar_config['export_max_records_per_file'] = '50000';
-$sugar_config['export_max_filesize'] = '50';
-$sugar_config['import_max_records_per_file'] = '50000';
-$sugar_config['import_max_filesize'] = '50';
-$sugar_config['import_max_execution_time'] = '60';
-$sugar_config['disable_persistent_connections'] = false;
-$sugar_config['allowUserSubscribedImpersonation'] = true;
-$sugar_config['log_memory_usage'] = false;
-$sugar_config['dump_max_id'] = 100000;
-$sugar_config['max_url_length'] = 2048;
-$sugar_config['tracker_max_return'] = 1000;
-$sugar_config['job_max_run_time'] = 60;
-$sugar_config['impersonation'] = array(
-    'admin_role_id' => '1',
-);
-$sugar_config['aod_settings'] = array(
-    'max_notification_number' => 10,
-);
-$sugar_config['email_enable_auto_attachments'] = true;
-$sugar_config['email_personal_to_multiple'] = true;
-$sugar_config['email_marketing_track'] = true;
-$sugar_config['calendar_publish_delimiter'] = ',';
-$sugar_config['allow_api_updating_own_info'] = false;
-$sugar_config['allow_api_delete_modules'] = false;
-$sugar_config['default_module_favicon'] = false;
-$sugar_config['email_allow_external_domains'] = false;
-$sugar_config['email_critical_errors'] = false;
-$sugar_config['email_enable_ldap'] = false;
-$sugar_config['email_templates_external'] = false;
-$sugar_config['email_force_ignore_savemodal'] = false;
-$sugar_config['mailer_options'] = array(
-    'SMTPAuth' => '',
-    'SMTPAutoTLS' => '',
-    'SMTPSecure' => '',
-);
-CONFEOF
+\$config = '<?php\n';
+\$config .= '\$sugar_config = array();\n';
+\$config .= '\$sugar_config[\"dbconfig\"] = array(\n';
+\$config .= '    \"db_host_name\" => \"' . \$db_host . '\",\n';
+\$config .= '    \"db_host_port\" => \"' . \$db_port . '\",\n';
+\$config .= '    \"db_user_name\" => \"' . \$db_user . '\",\n';
+\$config .= '    \"db_password\"  => \"' . \$db_pass . '\",\n';
+\$config .= '    \"db_name\"      => \"' . \$db_name . '\",\n';
+\$config .= '    \"db_type\"      => \"mysql\",\n';
+\$config .= '    \"db_connector\" => \"\",\n';
+\$config .= ');\n';
+\$config .= '\$sugar_config[\"site_url\"] = \"' . \$site_url . '\";\n';
+\$config .= '\$sugar_config[\"default_theme\"] = \"SuiteP\";\n';
+\$config .= '\$sugar_config[\"default_language\"] = \"en_us\";\n';
+\$config .= '\$sugar_config[\"log_dir\"] = \"logs/\";\n';
+\$config .= '\$sugar_config[\"cache_dir\"] = \"cache/\";\n';
+\$config .= '\$sugar_config[\"upload_dir\"] = \"upload/\";\n';
+\$config .= '\$sugar_config[\"custom_dir\"] = \"custom/\";\n';
+\$config .= '\$sugar_config[\"modules_dir\"] = \"modules/\";\n';
+\$config .= '\$sugar_config[\"themes_dir\"] = \"themes/\";\n';
+\$config .= '\$sugar_config[\"template_dir\"] = \"themes/\";\n';
+\$config .= '\$sugar_config[\"import_dir\"] = \"cache/import/\";\n';
+\$config .= '\$sugar_config[\"display_errors\"] = false;\n';
+\$config .= '\$sugar_config[\"error_reporting\"] = true;\n';
+\$config .= '\$sugar_config[\"test\"] = false;\n';
+\$config .= '\$sugar_config[\"use_php_json\"] = true;\n';
+\$config .= '\$sugar_config[\"use_cookies_for_session\"] = true;\n';
+\$config .= '\$sugar_config[\"http_only\"] = true;\n';
+\$config .= '\$sugar_config[\"session\"] = array(\n';
+\$config .= '    \"auto_start\" => false,\n';
+\$config .= '    \"name\" => \"sugar_user_theme\",\n';
+\$config .= ');\n';
+\$config .= '\$sugar_config[\"default_date_format\"] = \"m/d/Y\";\n';
+\$config .= '\$sugar_config[\"default_time_format\"] = \"h:i a\";\n';
+\$config .= '\$sugar_config[\"default_number_grouping\"] = \"3\";\n';
+\$config .= '\$sugar_config[\"default_decimal_symbol\"] = \".\";\n';
+\$config .= '\$sugar_config[\"default_currency_significant_digits\"] = \"2\";\n';
+\$config .= '\$sugar_config[\"default_currency_name\"] = \"US Dollar\";\n';
+\$config .= '\$sugar_config[\"default_currency_symbol\"] = \"\\\$\";\n';
+\$config .= '\$sugar_config[\"default_locale_name_format\"] = \"s f l\";\n';
+\$config .= '\$sugar_config[\"scanner_type\"] = \"files\";\n';
+\$config .= '\$sugar_config[\"admin\"] = array(\n';
+\$config .= '    \"dir_name\" => \"admin\",\n';
+\$config .= '    \"default_action\" => \"home\",\n';
+\$config .= ');\n';
+\$config .= '\$sugar_config[\"export_max_records_per_file\"] = \"50000\";\n';
+\$config .= '\$sugar_config[\"export_max_filesize\"] = \"50\";\n';
+\$config .= '\$sugar_config[\"import_max_records_per_file\"] = \"50000\";\n';
+\$config .= '\$sugar_config[\"import_max_filesize\"] = \"50\";\n';
+\$config .= '\$sugar_config[\"import_max_execution_time\"] = \"60\";\n';
+\$config .= '\$sugar_config[\"disable_persistent_connections\"] = false;\n';
+\$config .= '\$sugar_config[\"allowUserSubscribedImpersonation\"] = true;\n';
+\$config .= '\$sugar_config[\"log_memory_usage\"] = false;\n';
+\$config .= '\$sugar_config[\"dump_max_id\"] = 100000;\n';
+\$config .= '\$sugar_config[\"max_url_length\"] = 2048;\n';
+\$config .= '\$sugar_config[\"tracker_max_return\"] = 1000;\n';
+\$config .= '\$sugar_config[\"job_max_run_time\"] = 60;\n';
 
+file_put_contents('${SUITECRM_WEB}/config.php', \$config);
+"
 chown www-data:www-data "$SUITECRM_WEB/config.php"
 chmod 640 "$SUITECRM_WEB/config.php"
 echo "      Done."
