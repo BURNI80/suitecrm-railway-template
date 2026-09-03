@@ -164,9 +164,15 @@ echo "      Done."
 # ── 5. Set permissions + start services ──
 echo "[5/5] Setting permissions and starting services..."
 
-# Generate Apache config with correct ServerName
+# Railway provides PORT env - use it, default to 80
+PORT="${PORT:-80}"
+
+# Configure Apache to listen on the right port
+sed -i "s/^Listen .*/Listen ${PORT}/" /etc/apache2/ports.conf
+
+# Generate Apache config with correct ServerName and port
 cat > /etc/apache2/sites-available/000-default.conf << APACHEEOF
-<VirtualHost *:80>
+<VirtualHost *:${PORT}>
     DocumentRoot /var/www/html
     ServerName ${RAILWAY_PUBLIC_DOMAIN:-localhost}
 
