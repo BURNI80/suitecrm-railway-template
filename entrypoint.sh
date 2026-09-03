@@ -174,19 +174,19 @@ cat > /etc/apache2/sites-available/000-default.conf << APACHEEOF
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
+
+        <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+
+            RewriteCond %{DOCUMENT_ROOT}/config.php !-f
+            RewriteRule ^(.*)$ /install.php [L]
+
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteRule ^(.*)$ index.php?entryPoint=\$1 [QSA,L]
+        </IfModule>
     </Directory>
-
-    <IfModule mod_rewrite.c>
-        RewriteEngine On
-        RewriteBase /
-
-        RewriteCond %{DOCUMENT_ROOT}/config.php !-f
-        RewriteRule ^(.*)$ /install.php [L]
-
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteRule ^(.*)$ index.php?entryPoint=\$1 [QSA,L]
-    </IfModule>
 
     <IfModule mod_headers.c>
         Header always set X-Content-Type-Options nosniff
