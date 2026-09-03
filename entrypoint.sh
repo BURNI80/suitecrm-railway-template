@@ -125,6 +125,21 @@ GEN_SITE_URL="$SITE_URL" \
 GEN_OUT_FILE="$SUITECRM_WEB/config.php" \
 php /tmp/gen_config.php
 
+# Debug: show DB connection info and test
+echo "[DEBUG] DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_USER=$DB_USER DB_NAME=$DB_NAME"
+echo "[DEBUG] DB_PASS length=${#DB_PASS}"
+echo "[DEBUG] config.php first 5 lines:"
+head -5 "$SUITECRM_WEB/config.php"
+
+# Test DB connection
+TEST_DB_HOST="$DB_HOST" TEST_DB_PORT="$DB_PORT" TEST_DB_USER="$DB_USER" TEST_DB_PASS="$DB_PASS" TEST_DB_NAME="$DB_NAME" \
+php -r "
+\$c = @new mysqli(getenv('TEST_DB_HOST'), getenv('TEST_DB_USER'), getenv('TEST_DB_PASS'), getenv('TEST_DB_NAME'), (int)getenv('TEST_DB_PORT'));
+if (\$c->connect_error) { echo '[DEBUG] DB CONNECT FAIL: ' . \$c->connect_error . PHP_EOL; exit(1); }
+echo '[DEBUG] DB CONNECT OK' . PHP_EOL;
+\$c->close();
+" || true
+
 chown www-data:www-data "$SUITECRM_WEB/config.php"
 chmod 640 "$SUITECRM_WEB/config.php"
 echo "      Done."
