@@ -163,6 +163,42 @@ echo "      Done."
 
 # ── 5. Set permissions + start services ──
 echo "[5/5] Setting permissions and starting services..."
+
+# Generate Apache config with correct ServerName
+cat > /etc/apache2/sites-available/000-default.conf << APACHEEOF
+<VirtualHost *:80>
+    DocumentRoot /var/www/html
+    ServerName ${RAILWAY_PUBLIC_DOMAIN:-localhost}
+
+    <Directory /var/www/html>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteBase /
+
+        RewriteCond %{DOCUMENT_ROOT}/config.php !-f
+        RewriteRule ^(.*)$ /install.php [L]
+
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^(.*)$ index.php?entryPoint=\$1 [QSA,L]
+    </IfModule>
+
+    <IfModule mod_headers.c>
+        Header always set X-Content-Type-Options nosniff
+        Header always set X-Frame-Options SAMEORIGIN
+        Header always set X-XSS-Protection "1; mode=block"
+    </IfModule>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+APACHEEOF
+
 chown -R www-data:www-data "$SUITECRM_WEB"
 find "$SUITECRM_WEB" -type d -exec chmod 775 {} \;
 find "$SUITECRM_WEB" -type f -exec chmod 664 {} \;
