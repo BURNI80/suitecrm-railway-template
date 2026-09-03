@@ -33,8 +33,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     sockets \
     sodium
 
-# Enable Apache modules - disable event MPM, enable prefork for mod_rewrite
-RUN a2dismod mpm_event && a2enmod mpm_prefork && a2enmod rewrite headers expires
+# Switch from event to prefork MPM and enable rewrite
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.* && \
+    a2enmod mpm_prefork && \
+    a2enmod rewrite headers expires
 
 # PHP config
 COPY php.ini /usr/local/etc/php/conf.d/suitecrm.ini

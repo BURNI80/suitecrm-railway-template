@@ -47,9 +47,11 @@ ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASS="${ADMIN_PASS:-admin}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.com}"
 
-# Site URL from Railway
+# Site URL from Railway - check both PRIVATE and PUBLIC domain variables
 if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
     SITE_URL="https://${RAILWAY_PUBLIC_DOMAIN}"
+elif [ -n "$RAILWAY_SERVICE_DOMAIN" ]; then
+    SITE_URL="https://${RAILWAY_SERVICE_DOMAIN}"
 else
     SITE_URL="${APP_URL:-http://localhost}"
 fi
